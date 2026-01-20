@@ -10,13 +10,13 @@ from flask_bootstrap import Bootstrap5
 import os
 from flask_sqlalchemy import SQLAlchemy
 basedir = Path.cwd()
-print(str(basedir / "backend" / "data" / "data.sqlite"))
+datadir = (basedir / "backend" / "data" / "data.sqlite")
 
 app = Flask(__name__)
 
 bootstrap = Bootstrap5(app)
 
 app.config['SECRET_KEY'] = 'key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + str(basedir / "backend" / "data" / "data.sqlite")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + str(datadir)
 
 db = SQLAlchemy(app)
