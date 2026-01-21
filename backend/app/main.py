@@ -8,16 +8,26 @@ from pathlib import Path # For handling file paths
 from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
 from flask_sqlalchemy import SQLAlchemy #
 
-basedir = Path.cwd()
-datadir = (basedir / "backend" / "data" / "data.sqlite")
+base_dir = Path.cwd()
+data_dir = (base_dir / "backend" / "data" / "data.sqlite")
+template_dir = str(base_dir / "frontend" / "templates")
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=template_dir)
 
 CORS(app)
 
 bootstrap = Bootstrap5(app)
 
 app.config['SECRET_KEY'] = 'key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + str(datadir)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + str(data_dir)
 
 db = SQLAlchemy(app)
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
