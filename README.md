@@ -1,7 +1,6 @@
-# OS Mock Task 2
-## Riget Zoo Adventures Website
+# OS Mock Task 2 - Riget Zoo Adventures Website
 
-Tasks to complete:
+## Modules:
 - Login & Registration [3/3]
     - Login & Registration Pages [X]
     - Database Integration [X]
@@ -22,3 +21,6 @@ Tasks to complete:
 - Information Dashboard [0/1]
     - Dashboard Page [ ]
 - Frontend Design [ ]
+
+## Login & Registration Module
+TBA
