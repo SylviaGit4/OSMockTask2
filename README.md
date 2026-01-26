@@ -2,10 +2,10 @@
 ## Riget Zoo Adventures Website
 
 Tasks to complete:
-- Login & Registration [2/3]
+- Login & Registration [3/3]
     - Login & Registration Pages [X]
     - Database Integration [X]
-    - Login Redirect [ ]
+    - Login Redirect [X]
 - Backend Database [0/2]
     - Users Table [ ]
     - Booking Table [ ]
@@ -21,3 +21,4 @@ Tasks to complete:
     - Database Management [ ]
 - Information Dashboard [0/1]
     - Dashboard Page [ ]
+- Frontend Design [ ]

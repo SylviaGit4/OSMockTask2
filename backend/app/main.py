@@ -6,8 +6,7 @@ from wtforms import StringField, SubmitField, PasswordField # For creating forms
 from wtforms.validators import DataRequired # For creating forms
 from pathlib import Path # For handling file paths
 from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
-from flask_sqlalchemy import SQLAlchemy #
-
+from flask_sqlalchemy import SQLAlchemy # For database handling
 from forms import LoginForm, RegistrationForm
 
 base_dir = Path.cwd()
@@ -76,8 +75,8 @@ def login():
         
         if user and user.password == password:
             load_user(user.id)
-            # login_user(user)
-            return redirect(url_for('protected'))      
+            login_user(user)
+            return redirect(url_for('dashboard'))      
         else:
             loginError = "Invalid email or password."
 
@@ -100,6 +99,10 @@ def register():
 
     return render_template('register.html', form=form, registerError=registerError)
 
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
