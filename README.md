@@ -3,8 +3,11 @@
 
 Tasks to complete:
 - Login & Registration
-- Backend Database
-- Booking System
-- Settings Panel
-- Admin Panel
-- Information Dashboard
+    - Login & Registration Pages [X]
+    - Database Integration [ ]
+    - Login Redirect [ ]
+- Backend Database [ ]
+- Booking System [ ]
+- Settings Panel [ ] 
+- Admin Panel [ ]
+- Information Dashboard [ ]
