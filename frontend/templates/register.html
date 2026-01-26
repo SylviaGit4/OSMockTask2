@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    <div class = "card" style ="width: 18rem; margin: auto; margin-top: 20px; padding: 5px;">
+        <div class="card-body">
+            <form method = "POST", class="form">
+                <h5 class="card-title">Register Account</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Input your username, email & password below to register.</h6>
+                {{ form.hidden_tag() }}
+                {{ form.username(placeholder="Username") }}
+                {{ form.email(placeholder="Email") }}
+                {{ form.password(placeholder="Password") }}
+                {% if registerError %}
+                    <div class="error">{{ registerError }}</div>
+                {% endif %}
+                {{ form.submit(class_="btn btn-primary") }}
+            </form>
+            <a class="btn btn-secondary btn-sm" href="{{ url_for('login') }}">Login</a>
+        </div>
+    </div>
+{% endblock %}
