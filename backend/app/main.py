@@ -6,8 +6,8 @@ from wtforms import StringField, SubmitField, PasswordField # For creating forms
 from wtforms.validators import DataRequired # For creating forms
 from pathlib import Path # For handling file paths
 from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
-from flask_sqlalchemy import SQLAlchemy # For database handling
 from forms import LoginForm, RegistrationForm
+from flask_sqlalchemy import SQLAlchemy # For database handling
 
 base_dir = Path.cwd()
 data_dir = (base_dir / "backend" / "data" / "data.sqlite")
@@ -30,15 +30,17 @@ login_handler.init_app(app)
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-
 db = SQLAlchemy(app)
 
 class Users(db.Model):
     __tablename__ = 'Users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64))
-    email = db.Column(db.String(64), unique=True)
+    email = db.Column(db.String(64), unique=True) 
     password = db.Column(db.String(64))
+    is_admin = db.Column(db.Boolean, default=False)
+    loyalty_points = db.Column(db.Integer, default=0)
+    is_premium = db.Column(db.Boolean, default=False)
 
     # Flask-Login required properties/methods
     @property
@@ -55,6 +57,31 @@ class Users(db.Model):
 
     def get_id(self):
         return str(self.id)
+
+class Zoo_Booking(db.Model):
+    __tablename__ = 'Zoo_Booking'
+    visit_id = db.Column(db.Integer, primary_key=True)
+    start_date = db.Column(db.String(64))
+    end_date = db.Column(db.String(64))
+    child_tickets = db.Column(db.Integer)
+    adult_tickets = db.Column(db.Integer())
+    educational_visit = db.Column(db.Boolean, default=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+
+class Hotel_Booking(db.Model):
+    __tablename__ = 'Hotel_Booking'
+    hotel_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+    start_date = db.Column(db.String(64))
+    end_date = db.Column(db.String(64))
+    room_id = db.Column(db.Integer, db.ForeignKey('Room.room_id'))
+
+class Room(db.Model):
+    __tablename__ = 'Room'
+    room_id = db.Column(db.Integer, primary_key=True)
+    room_type = db.Column(db.String(64))
+    latest_checkin = db.Column(db.String(64))
+    room_price = db.Column(db.Float)
 
 with app.app_context():
     db.create_all()
