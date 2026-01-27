@@ -20,7 +20,8 @@
     - Database Management [ ]
 - Information Dashboard [0/1]
     - Dashboard Page [ ]
-- Frontend Design [ ]
+- Frontend Design [0/1]
+    - Appealing Web Design [ ]
 
 ## Login & Registration Module
 TBA
