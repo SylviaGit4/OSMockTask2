@@ -5,7 +5,7 @@
     - Login & Registration Pages [X]
     - Database Integration [X]
     - Login Redirect [X]
-- Backend Database [1/4]
+- Backend Database [4/4]
     - Users Table [X]
     - Zoo Booking Table [X]
     - Hotel Booking Table [X]
