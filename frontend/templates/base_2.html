@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <title>{% block title %} {% endblock %} - Application</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'styles/style.css') }}">
+    {{ bootstrap.load_css() }}
+    {% endblock %}
+</head>
+<body>
+
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid d-flex justify-content-center">
+            <span class="navbar-brand mb-0 h1">
+                <h2 class="navbar-brand d-flex justify-content-center">Riget Zoo Adventure</h2>
+                <a class="btn btn-secondary btn-sm" href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a class="btn btn-secondary btn-sm" href="{{ url_for('booking') }}">Booking</a>
+            </span>
+        </div>
+    </nav>
+
+    {% block body %}
+    {% endblock %}
+
+    {% block scripts %}
+    {{ bootstrap.load_js() }}
+    {% endblock %}
+</body>
+</html>
