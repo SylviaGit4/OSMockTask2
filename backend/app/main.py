@@ -131,6 +131,10 @@ def register():
 def dashboard():
     return render_template('dashboard.html')
 
+@app.route('/booking')
+@login_required
+def booking():
+    return render_template('booking.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
