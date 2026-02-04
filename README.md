@@ -25,5 +25,4 @@
 - Frontend Design [0/1]
     - Appealing Web Design [ ]
 
-## Login & Registration Module
-TBA
+Current task: Linking backend to booking page.
