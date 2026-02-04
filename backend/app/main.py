@@ -6,8 +6,9 @@ from wtforms import StringField, SubmitField, PasswordField # For creating forms
 from wtforms.validators import DataRequired # For creating forms
 from pathlib import Path # For handling file paths
 from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
-from forms import LoginForm, RegistrationForm
+from login_forms import LoginForm, RegistrationForm
 from flask_sqlalchemy import SQLAlchemy # For database handling
+from sqlalchemy.orm import DeclarativeBase
 
 base_dir = Path.cwd()
 data_dir = (base_dir / "backend" / "data" / "data.sqlite")
@@ -30,7 +31,10 @@ login_handler.init_app(app)
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-db = SQLAlchemy(app)
+class Base(DeclarativeBase):
+  pass
+
+db = SQLAlchemy(app, model_class=Base)
 
 class Users(db.Model):
     __tablename__ = 'Users'
@@ -68,6 +72,22 @@ class Zoo_Booking(db.Model):
     educational_visit = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
 
+    # Flask-Login required properties/methods
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)
+
 class Hotel_Booking(db.Model):
     __tablename__ = 'Hotel_Booking'
     hotel_id = db.Column(db.Integer, primary_key=True)
@@ -76,12 +96,44 @@ class Hotel_Booking(db.Model):
     end_date = db.Column(db.String(64))
     room_id = db.Column(db.Integer, db.ForeignKey('Room.room_id'))
 
+    # Flask-Login required properties/methods
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)
+
 class Room(db.Model):
     __tablename__ = 'Room'
     room_id = db.Column(db.Integer, primary_key=True)
     room_type = db.Column(db.String(64))
     latest_checkin = db.Column(db.String(64))
     room_price = db.Column(db.Float)
+
+    # Flask-Login required properties/methods
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return str(self.id)
 
 with app.app_context():
     db.create_all()
@@ -131,7 +183,7 @@ def register():
 def dashboard():
     return render_template('dashboard.html')
 
-@app.route('/booking')
+@app.route('/booking', methods = ['GET', 'POST'])
 @login_required
 def booking():
     return render_template('booking.html')
