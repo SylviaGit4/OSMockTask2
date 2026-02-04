@@ -1,4 +1,4 @@
-from flask import Flask, url_for, render_template, redirect 
+from flask import Flask, url_for, render_template, redirect, request
 from flask_login import LoginManager, login_required, login_user # For ensuring user login protection
 from flask_cors import CORS # Added to allow other files to call the app
 from flask_wtf import FlaskForm # For creating forms
@@ -7,6 +7,7 @@ from wtforms.validators import DataRequired # For creating forms
 from pathlib import Path # For handling file paths
 from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
 from login_forms import LoginForm, RegistrationForm
+from booking import BookingForm
 from flask_sqlalchemy import SQLAlchemy # For database handling
 from sqlalchemy.orm import DeclarativeBase
 
@@ -186,7 +187,12 @@ def dashboard():
 @app.route('/booking', methods = ['GET', 'POST'])
 @login_required
 def booking():
-    return render_template('booking.html')
+    form = BookingForm()
+    if form.validate_on_submit():
+        # booking_data = get_booking_from_request()
+        # Process the booking data (e.g., save to database)
+        return redirect(url_for('payment'))
+    return render_template('booking.html', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
