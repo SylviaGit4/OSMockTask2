@@ -12,10 +12,3 @@ class BookingForm(FlaskForm):
     adult_tickets = IntegerField('Adult Tickets', default=0, validators=[Optional()])
     educational_visit = BooleanField('Educational Visit')
     submit = SubmitField('Book')
-
-
-def get_booking_from_request():
-    return {
-        'start_date_zoo': request.form.get('zoo_start'),
-        'end_date_zoo': request.form.get('zoo_end')
-    }
