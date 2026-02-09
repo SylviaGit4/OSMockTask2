@@ -3,8 +3,7 @@ from flask_login import LoginManager, login_required, login_user, current_user #
 from flask_cors import CORS # Added to allow other files to call the app
 from pathlib import Path # For handling file paths
 from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
-from login_forms import LoginForm, RegistrationForm
-from booking import BookingForm
+from forms import ZooBookingForm, LoginForm, RegistrationForm
 from flask_sqlalchemy import SQLAlchemy # For database handling
 from sqlalchemy.orm import DeclarativeBase
 
@@ -184,7 +183,7 @@ def dashboard():
 @app.route('/booking', methods = ['GET', 'POST'])
 @login_required
 def booking():
-    form = BookingForm()
+    form = ZooBookingForm()
     if form.validate_on_submit():
         
         # Check if at least one ticket is selected
