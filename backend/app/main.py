@@ -1,9 +1,6 @@
-from flask import Flask, url_for, render_template, redirect, request
-from flask_login import LoginManager, login_required, login_user # For ensuring user login protection
+from flask import Flask, url_for, render_template, redirect, request, flash
+from flask_login import LoginManager, login_required, login_user, current_user # For ensuring user login protection
 from flask_cors import CORS # Added to allow other files to call the app
-from flask_wtf import FlaskForm # For creating forms
-from wtforms import StringField, SubmitField, PasswordField # For creating forms
-from wtforms.validators import DataRequired # For creating forms
 from pathlib import Path # For handling file paths
 from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
 from login_forms import LoginForm, RegistrationForm
@@ -189,9 +186,30 @@ def dashboard():
 def booking():
     form = BookingForm()
     if form.validate_on_submit():
-        # booking_data = get_booking_from_request()
-        # Process the booking data (e.g., save to database)
-        return redirect(url_for('payment'))
+        
+        # Check if at least one ticket is selected
+        if form.child_tickets.data < 1 and form.adult_tickets.data < 1:
+            flash('Please select at least one ticket (child or adult).', 'danger')
+            return render_template('booking.html', form=form)
+        
+        # Check if dates are chronological
+        if form.start_date_zoo.data > form.end_date_zoo.data:
+            flash('End date must be after start date.', 'danger')
+            return render_template('booking.html', form=form)
+
+        new_booking = Zoo_Booking(
+            start_date=form.start_date_zoo.data, # Start date of visit
+            end_date=form.end_date_zoo.data, # End date of visit
+            user_id=current_user.id,  # Links booking to logged-in user
+            child_tickets=form.child_tickets.data, # Links number of child tickets
+            adult_tickets=form.adult_tickets.data, # Links number of adult tickets
+            educational_visit=form.educational_visit.data # Links to check if visit is educational
+        )
+
+        db.session.add(new_booking)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+
     return render_template('booking.html', form=form)
 
 if __name__ == '__main__':

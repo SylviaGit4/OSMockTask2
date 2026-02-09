@@ -10,10 +10,49 @@
 
 {% block body %}
     <div class="container-sm d-flex flex-column" style="margin-top: 20px;">
-        <h2 class = "d-flex justify-content-center">Booking.</h2>
+        <h2 class="d-flex justify-content-center">Booking</h2>
+        
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-3">
+                {{ form.start_date_zoo.label }}
+                {{ form.start_date_zoo(type="date", class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.end_date_zoo.label }}
+                {{ form.end_date_zoo(type="date", class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.child_tickets.label }}
+                {{ form.child_tickets(class="form-control", min="0") }}
+            </div>
 
-        <p name="zoo_start">Start Date: <input type="date" id="datepicker"></p>
-        <p name="zoo_end">End Date: <input type="date" id="datepicker"></p>
-        {{ form.submit(class_="btn btn-primary") }}
+            <div class="mb-3">
+                {{ form.adult_tickets.label }}
+                {{ form.adult_tickets(class="form-control", min="0") }}
+            </div>
+
+            <div class="mb-3 form-check">
+                {{ form.educational_visit(class="form-check-input") }}
+                {{ form.educational_visit.label(class="form-check-label") }}
+            </div>
+
+            {{ form.submit(class_="btn btn-primary") }}
+        </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
     </div>
 {% endblock %}
