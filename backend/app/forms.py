@@ -1,9 +1,6 @@
-from flask import Flask, request
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, IntegerField, BooleanField, PasswordField
 from wtforms.validators import DataRequired, Optional
-from sqlalchemy.orm import DeclarativeBase
-from flask_sqlalchemy import SQLAlchemy
 
 class ZooBookingForm(FlaskForm):
     start_date_zoo = StringField('Start Date', validators=[DataRequired()])
