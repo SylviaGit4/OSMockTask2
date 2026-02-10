@@ -237,14 +237,15 @@ def booking():
         if not rooms:
             flash('Selected room type is not available.', 'danger')
             return render_template('booking.html', form=form)
-        
+
         for room in rooms:
             if room.latest_checkin < form.start_date_hotel.data: # Check if room is available for selected dates
                 selected_room=room.room_id
                 break
-            else:
-                flash('No rooms of the selected type are available for the selected dates.', 'danger')
-                return render_template('booking.html', form=form)
+        
+        if not selected_room:
+            flash('No rooms available for selected dates.', 'danger')
+            return render_template('booking.html', form=form)
 
         new_hotel_booking = Hotel_Booking(
             start_date=form.start_date_hotel.data, # Start date of hotel stay
