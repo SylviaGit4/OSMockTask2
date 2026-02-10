@@ -40,6 +40,21 @@
                 {{ form.educational_visit.label(class="form-check-label") }}
             </div>
 
+            <div class="mb-3">
+                {{ form.start_date_hotel.label }}
+                {{ form.start_date_hotel(type="date", class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.end_date_hotel.label }}
+                {{ form.end_date_hotel(type="date", class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.room_type.label }}
+                {{ form.room_type(class="form-control") }}
+            </div>
+
             {{ form.submit(class_="btn btn-primary") }}
         </form>
 

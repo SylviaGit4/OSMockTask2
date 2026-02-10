@@ -1,12 +1,12 @@
-from turtle import st
 from flask import Flask, url_for, render_template, redirect, request, flash
 from flask_login import LoginManager, login_required, login_user, current_user # For ensuring user login protection
 from flask_cors import CORS # Added to allow other files to call the app
 from pathlib import Path # For handling file paths
 from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
-from forms import ZooBookingForm, LoginForm, RegistrationForm
+from forms import LoginForm, RegistrationForm, BookingForm, RoomCreate # Importing forms from forms.py
 from flask_sqlalchemy import SQLAlchemy # For database handling
 from sqlalchemy.orm import DeclarativeBase
+from datetime import date # For handling dates in hotel booking
 
 base_dir = Path.cwd()
 data_dir = (base_dir / "backend" / "data" / "data.sqlite")
@@ -113,10 +113,10 @@ class Hotel_Booking(db.Model):
 
 class Room(db.Model):
     __tablename__ = 'Room'
-    room_id = db.Column(db.Integer, primary_key=True)
-    room_type = db.Column(db.String(64))
+    room_id = db.Column(db.Integer, primary_key=True, index=True, autoincrement=True)
+    room_type = db.Column(db.String(64), nullable=False)
     latest_checkin = db.Column(db.String(64))
-    room_price = db.Column(db.Float)
+    room_price = db.Column(db.Float, nullable=False)
 
     # Flask-Login required properties/methods
     @property
@@ -182,12 +182,34 @@ def register():
 def dashboard():
     return render_template('dashboard.html')
 
+@app.route('/admin', methods = ['GET', 'POST'])
+@login_required
+def admin():
+    form = RoomCreate()
+
+    if form.validate_on_submit():
+        new_room = Room(
+            room_type=form.room_type.data,
+            room_price=form.room_price.data,
+            latest_checkin=date(2000, 1, 1) # Set to a default date far in the past to indicate room is available
+        )
+        db.session.add(new_room)
+        db.session.commit()
+        flash('Room created successfully!', 'success')
+
+    # Only allow admin users to access the admin page, otherwise redirect to dashboard.
+    if Users.query.get(current_user.id).is_admin:
+        return render_template('admin.html', form=form)
+    else:
+        return redirect(url_for('dashboard'))
+
 @app.route('/booking', methods = ['GET', 'POST'])
 @login_required
 def booking():
-    form = ZooBookingForm()
+    form = BookingForm()
+ 
     if form.validate_on_submit():
-        
+
         # Check if at least one ticket is selected
         if form.child_tickets.data < 1 and form.adult_tickets.data < 1:
             flash('Please select at least one ticket (child or adult).', 'danger')
@@ -198,7 +220,7 @@ def booking():
             flash('End date must be after start date.', 'danger')
             return render_template('booking.html', form=form)
 
-        new_booking = Zoo_Booking(
+        new_zoo_booking = Zoo_Booking(
             start_date=form.start_date_zoo.data, # Start date of visit
             end_date=form.end_date_zoo.data, # End date of visit
             user_id=current_user.id,  # Links booking to logged-in user
@@ -207,10 +229,41 @@ def booking():
             educational_visit=form.educational_visit.data # Links to check if visit is educational
         )
 
-        db.session.add(new_booking)
-        db.session.commit()
-        return redirect(url_for('dashboard'))
+        if form.start_date_hotel.data > form.end_date_hotel.data:
+            flash('Hotel end date must be after start date.', 'danger')
+            return render_template('booking.html', form=form)
 
+        rooms = Room.query.filter_by(room_type=form.room_type.data).all() # Check if room type is available
+        if not rooms:
+            flash('Selected room type is not available.', 'danger')
+            return render_template('booking.html', form=form)
+        
+        for room in rooms:
+            if room.latest_checkin < form.start_date_hotel.data: # Check if room is available for selected dates
+                selected_room=room.room_id
+                break
+            else:
+                flash('No rooms of the selected type are available for the selected dates.', 'danger')
+                return render_template('booking.html', form=form)
+
+        new_hotel_booking = Hotel_Booking(
+            start_date=form.start_date_hotel.data, # Start date of hotel stay
+            end_date=form.end_date_hotel.data, # End date of hotel stay
+            user_id=current_user.id,  # Links booking to logged-in user
+            room_id=selected_room # Links to selected room for hotel booking
+        )
+
+        # Updates the latest check-in date for the selected room to ensure it is not double-booked for overlapping dates in the future
+        room_update = Room.query.filter_by(room_id=selected_room).first()
+        if room_update:
+            room_update.latest_checkin=form.end_date_hotel.data
+
+        db.session.add(new_hotel_booking)
+        db.session.add(new_zoo_booking)
+        db.session.commit()
+
+        return redirect(url_for('dashboard'))
+    
     return render_template('booking.html', form=form)
 
 if __name__ == '__main__':

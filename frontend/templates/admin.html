@@ -1,0 +1,38 @@
+{% extends "base_2.html" %}
+
+{% block title %}Admin{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <style>
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-sm d-flex flex-column" style="margin-top: 20px;">
+        <h2 class = "d-flex justify-content-center">Admin Dashboard</h2>
+    </div>
+
+    <div class="container-sm d-flex flex-column" style="margin-top: 20px;">
+        <h2 class = "d-flex justify-content-center">Create Room</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.room_type.label(class="form-label") }}
+                {{ form.room_type(class="form-select") }}
+            </div>
+            <div class="mb-3">
+                {{ form.room_price.label(class="form-label") }}
+                {{ form.room_price(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+            <div class="mb-3">
+                {% for message in get_flashed_messages(with_categories=true) %}
+                    <div class="alert alert-{{ message[0] }}">{{ message[1] }}</div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+{% endblock %}
