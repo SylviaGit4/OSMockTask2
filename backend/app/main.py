@@ -1,3 +1,4 @@
+from turtle import st
 from flask import Flask, url_for, render_template, redirect, request, flash
 from flask_login import LoginManager, login_required, login_user, current_user # For ensuring user login protection
 from flask_cors import CORS # Added to allow other files to call the app
@@ -10,8 +11,9 @@ from sqlalchemy.orm import DeclarativeBase
 base_dir = Path.cwd()
 data_dir = (base_dir / "backend" / "data" / "data.sqlite")
 template_dir = str(base_dir / "frontend" / "templates")
+static_dir = str(base_dir / "frontend" / "static")
 
-app = Flask(__name__, template_folder=template_dir)
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 CORS(app)
 
