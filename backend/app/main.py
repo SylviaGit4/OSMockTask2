@@ -191,11 +191,11 @@ def admin():
         new_room = Room(
             room_type=form.room_type.data,
             room_price=form.room_price.data,
-            latest_checkin=date(2000, 1, 1) # Set to a default date far in the past to indicate room is available
+            latest_checkin=date(2000, 1, 1) # Set to a default date
         )
         db.session.add(new_room)
         db.session.commit()
-        flash('Room created successfully!', 'success')
+        flash('Room created successfully.', 'success')
 
     # Only allow admin users to access the admin page, otherwise redirect to dashboard.
     if Users.query.get(current_user.id).is_admin:
@@ -207,7 +207,13 @@ def admin():
 @login_required
 def booking():
     form = BookingForm()
- 
+
+    # Initializing flag for validation error.
+    ''' Used to correctly validate that a room for selected dates is available.
+    If there is an error, room_validation will remain false & the database will not have a new commit and a flash message will be shown.
+    If there are no errors, room_validation will be set to true and the database will be updated with the new booking.'''
+    room_validation = False
+
     if form.validate_on_submit():
 
         # Check if at least one ticket is selected
@@ -241,11 +247,12 @@ def booking():
         for room in rooms:
             if room.latest_checkin < form.start_date_hotel.data: # Check if room is available for selected dates
                 selected_room=room.room_id
+                room_validation = True
                 break
-        
-        if not selected_room:
-            flash('No rooms available for selected dates.', 'danger')
-            return render_template('booking.html', form=form)
+            else:
+                room_validation = False 
+                selected_room = None
+
 
         new_hotel_booking = Hotel_Booking(
             start_date=form.start_date_hotel.data, # Start date of hotel stay
@@ -259,13 +266,20 @@ def booking():
         if room_update:
             room_update.latest_checkin=form.end_date_hotel.data
 
-        db.session.add(new_hotel_booking)
-        db.session.add(new_zoo_booking)
-        db.session.commit()
-
-        return redirect(url_for('dashboard'))
+        if room_validation == True:
+            db.session.add(new_hotel_booking)
+            db.session.add(new_zoo_booking)
+            db.session.commit()
+            return redirect(url_for('payment'))
+        elif room_validation == False:
+            flash('No rooms available for selected dates.', 'danger')
     
     return render_template('booking.html', form=form)
+
+@app.route('/payment')
+@login_required
+def payment():
+    return render_template('payment.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
