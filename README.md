@@ -10,11 +10,11 @@
     - Zoo Booking Table [X]
     - Hotel Booking Table [X]
     - Room Table [X]
-- Booking System [3/5]
+- Booking System [4/5]
     - Booking Page [X]
     - Database Integration (ZOO) [X]
     - Database Integration (HOTEL) [X]
-    - Payment system [ ]
+    - Payment system [X]
     - Loyalty System [ ]
 - Settings Panel [0/2]
     - Accessibility Settings [ ]
@@ -28,4 +28,3 @@
 - Frontend Design [0/1]
     - Appealing Web Design [ ]
 
-Current task: Linking backend to booking page.
