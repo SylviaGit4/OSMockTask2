@@ -6,7 +6,8 @@ from flask_bootstrap import Bootstrap5 # Bootstrap CSS integration
 from forms import LoginForm, RegistrationForm, BookingForm, RoomCreate # Importing forms from forms.py
 from flask_sqlalchemy import SQLAlchemy # For database handling
 from sqlalchemy.orm import DeclarativeBase
-from datetime import date # For handling dates in hotel booking
+from datetime import date, datetime # For handling dates in hotel booking
+from payment_calculation import calculate_cost # For calculating the cost of the booking based on user selections
 
 base_dir = Path.cwd()
 data_dir = (base_dir / "backend" / "data" / "data.sqlite")
@@ -235,8 +236,8 @@ def booking():
             educational_visit=form.educational_visit.data # Links to check if visit is educational
         )
 
-        if form.start_date_hotel.data > form.end_date_hotel.data:
-            flash('Hotel end date must be after start date.', 'danger')
+        if form.start_date_hotel.data >= form.end_date_hotel.data:
+            flash('Hotel end date must be after start date, and last at least one night.', 'danger')
             return render_template('booking.html', form=form)
 
         rooms = Room.query.filter_by(room_type=form.room_type.data).all() # Check if room type is available
@@ -261,16 +262,32 @@ def booking():
             room_id=selected_room # Links to selected room for hotel booking
         )
 
-        # Updates the latest check-in date for the selected room to ensure it is not double-booked for overlapping dates in the future
-        room_update = Room.query.filter_by(room_id=selected_room).first()
-        if room_update:
-            room_update.latest_checkin=form.end_date_hotel.data
+        ''' These variables are used to pass relevant booking information to the payment page after successful validation.
+        The ticket information is used to calculate the cost of each ticket, before being multiplied by the visit time to get the total cost of the zoo visit.
+        The educational visit boolean is used to apply a discount to the total cost of the zoo visit if applicable.
+        The room price is multiplied by the hotel time to get the total cost of the hotel stay.'''
+        child_tickets = form.child_tickets.data
+        adult_tickets = form.adult_tickets.data
+        visit_time = 1 + (datetime.strptime(form.end_date_hotel.data, '%Y-%m-%d') - datetime.strptime(form.start_date_hotel.data, '%Y-%m-%d')).days
+        educational_visit = form.educational_visit.data
+        room_price = Room.query.filter_by(room_id=selected_room).first().room_price
+        hotel_time = (datetime.strptime(form.end_date_hotel.data, '%Y-%m-%d') - datetime.strptime(form.start_date_hotel.data, '%Y-%m-%d')).days
+
+        total_cost = calculate_cost(child_tickets, adult_tickets, visit_time, educational_visit, room_price, hotel_time)
+        print(total_cost)
 
         if room_validation == True:
             db.session.add(new_hotel_booking)
             db.session.add(new_zoo_booking)
+
+            # Updates the latest check-in date for the selected room to ensure it is not double-booked for overlapping dates in the future
+            room_update = Room.query.filter_by(room_id=selected_room).first()
+            if room_update:
+                room_update.latest_checkin = form.end_date_hotel.data
+
             db.session.commit()
             return redirect(url_for('payment'))
+        
         elif room_validation == False:
             flash('No rooms available for selected dates.', 'danger')
     
