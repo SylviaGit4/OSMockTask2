@@ -214,6 +214,7 @@ def booking():
     If there is an error, room_validation will remain false & the database will not have a new commit and a flash message will be shown.
     If there are no errors, room_validation will be set to true and the database will be updated with the new booking.'''
     room_validation = False
+    hotel_booked = False
 
     if form.validate_on_submit():
 
@@ -236,31 +237,45 @@ def booking():
             educational_visit=form.educational_visit.data # Links to check if visit is educational
         )
 
-        if form.start_date_hotel.data >= form.end_date_hotel.data:
-            flash('Hotel end date must be after start date, and last at least one night.', 'danger')
-            return render_template('booking.html', form=form)
 
-        rooms = Room.query.filter_by(room_type=form.room_type.data).all() # Check if room type is available
-        if not rooms:
-            flash('Selected room type is not available.', 'danger')
-            return render_template('booking.html', form=form)
+        if form.room_type.data != 'none': # If hotel booking fields are filled out, validate hotel booking
+            if not form.start_date_hotel.data and form.end_date_hotel.data:
+                flash('Please enter a start date for the hotel booking.', 'danger')
 
-        for room in rooms:
-            if room.latest_checkin < form.start_date_hotel.data: # Check if room is available for selected dates
-                selected_room=room.room_id
-                room_validation = True
-                break
             else:
-                room_validation = False 
-                selected_room = None
+                if form.start_date_hotel.data >= form.end_date_hotel.data:
+                    flash('Hotel end date must be after start date, and last at least one night.', 'danger')
+
+                rooms = Room.query.filter_by(room_type=form.room_type.data).all() # Check if room type is available
+                if not rooms:
+                    flash('Selected room type is not available.', 'danger')
+
+                for room in rooms:
+                    if room.latest_checkin <= form.start_date_hotel.data: # Check if room is available for selected dates
+                        selected_room=room.room_id
+                        room_validation = True
+                        break
+                    else:
+                        room_validation = False 
+                        selected_room = None
 
 
-        new_hotel_booking = Hotel_Booking(
-            start_date=form.start_date_hotel.data, # Start date of hotel stay
-            end_date=form.end_date_hotel.data, # End date of hotel stay
-            user_id=current_user.id,  # Links booking to logged-in user
-            room_id=selected_room # Links to selected room for hotel booking
-        )
+                new_hotel_booking = Hotel_Booking(
+                    start_date=form.start_date_hotel.data, # Start date of hotel stay
+                    end_date=form.end_date_hotel.data, # End date of hotel stay
+                    user_id=current_user.id,  # Links booking to logged-in user
+                    room_id=selected_room # Links to selected room for hotel booking
+                )
+
+                hotel_booked = True
+
+            if hotel_booked == True and room_validation == True:
+                db.session.add(new_hotel_booking)
+
+            # Updates the latest check-in date for the selected room to ensure it is not double-booked for overlapping dates in the future
+            room_update = Room.query.filter_by(room_id=selected_room).first()
+            if room_update:
+                room_update.latest_checkin = form.end_date_hotel.data
 
         ''' These variables are used to pass relevant booking information to the payment page after successful validation.
         The ticket information is used to calculate the cost of each ticket, before being multiplied by the visit time to get the total cost of the zoo visit.
@@ -268,35 +283,35 @@ def booking():
         The room price is multiplied by the hotel time to get the total cost of the hotel stay.'''
         child_tickets = form.child_tickets.data
         adult_tickets = form.adult_tickets.data
-        visit_time = 1 + (datetime.strptime(form.end_date_hotel.data, '%Y-%m-%d') - datetime.strptime(form.start_date_hotel.data, '%Y-%m-%d')).days
+        visit_time = 1 + (datetime.strptime(form.end_date_zoo.data, '%Y-%m-%d') - datetime.strptime(form.start_date_zoo.data, '%Y-%m-%d')).days
         educational_visit = form.educational_visit.data
-        room_price = Room.query.filter_by(room_id=selected_room).first().room_price
-        hotel_time = (datetime.strptime(form.end_date_hotel.data, '%Y-%m-%d') - datetime.strptime(form.start_date_hotel.data, '%Y-%m-%d')).days
+        loyalty_points = Users.query.filter_by(id=current_user.id).first().loyalty_points
 
-        total_cost = calculate_cost(child_tickets, adult_tickets, visit_time, educational_visit, room_price, hotel_time)
-        print(total_cost)
+        if hotel_booked == True and room_validation == True:
+            room_price = Room.query.filter_by(room_id=selected_room).first().room_price
+            hotel_time = (datetime.strptime(form.end_date_hotel.data, '%Y-%m-%d') - datetime.strptime(form.start_date_hotel.data, '%Y-%m-%d')).days
+            total_cost = calculate_cost(child_tickets, adult_tickets, visit_time, educational_visit, room_price, hotel_time, loyalty_points)
+        elif hotel_booked == False:
+            hotel_time = 0
+            room_price = 0
+            total_cost = calculate_cost(child_tickets, adult_tickets, visit_time, educational_visit, room_price, hotel_time, loyalty_points)
+        else:
+            flash('Hotel booking validation failed. Please correct the errors and try again.', 'danger')
+            return redirect(url_for('booking'))
 
-        if room_validation == True:
-            db.session.add(new_hotel_booking)
-            db.session.add(new_zoo_booking)
+        loyalty_update = Users.query.filter_by(id=current_user.id).first()
+        if loyalty_update:
+            if loyalty_update.loyalty_points < 10: # Only adds loyalty points if the user has fewer than 10
+                loyalty_update.loyalty_points += 1
+            else:
+                loyalty_update.loyalty_points = 0 # Resets loyalty points if 10 or more are reached.
 
-            # Updates the latest check-in date for the selected room to ensure it is not double-booked for overlapping dates in the future
-            room_update = Room.query.filter_by(room_id=selected_room).first()
-            if room_update:
-                room_update.latest_checkin = form.end_date_hotel.data
-
-            db.session.commit()
-            return redirect(url_for('payment'))
-        
-        elif room_validation == False:
-            flash('No rooms available for selected dates.', 'danger')
+        db.session.add(new_zoo_booking)
+        db.session.add(loyalty_update)
+        db.session.commit()
+        flash('Booking successful! Total cost: £{:.2f}'.format(total_cost), 'success')
     
     return render_template('booking.html', form=form)
-
-@app.route('/payment')
-@login_required
-def payment():
-    return render_template('payment.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

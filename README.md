@@ -15,7 +15,7 @@
     - Database Integration (ZOO) [X]
     - Database Integration (HOTEL) [X]
     - Payment system [X]
-    - Loyalty System [ ]
+    - Loyalty System [X]
 - Settings Panel [0/2]
     - Accessibility Settings [ ]
     - Account Settings [ ]

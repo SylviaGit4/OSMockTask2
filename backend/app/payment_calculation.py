@@ -1,7 +1,7 @@
 '''This module contains the calculation for the total cost of a zoo visit & hotel.
 '''
 
-def calculate_cost(child_tickets, adult_tickets, visit_time, educational_visit, room_price, hotel_time):
+def calculate_cost(child_tickets, adult_tickets, visit_time, educational_visit, room_price, hotel_time, loyalty_points):
     child_ticket_value = 10
     adult_ticket_value = 20
     educational_visit_discount = 0.9 # 10% discount for educational visits
@@ -15,5 +15,8 @@ def calculate_cost(child_tickets, adult_tickets, visit_time, educational_visit, 
     total_hotel_cost = room_price * hotel_time
 
     total_cost = total_visit_cost + total_hotel_cost
+
+    if loyalty_points >= 10:
+        total_cost = 0 # With 10 (or more) loyalty points, the visit is free.
 
     return total_cost
