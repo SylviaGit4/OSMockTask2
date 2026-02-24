@@ -1,6 +1,6 @@
 # OS Mock Task 2 - Riget Zoo Adventures Website
 
-## Modules:
+## Modules [14/18]:
 - Login & Registration [3/3]
     - Login & Registration Pages [X]
     - Database Integration [X]
@@ -16,14 +16,13 @@
     - Database Integration (HOTEL) [X]
     - Payment system [X]
     - Loyalty System [X]
-- Settings Panel [0/2]
-    - Accessibility Settings [ ]
-    - Account Settings [ ]
 - Admin Panel [2/2]
     - Admin Login [X]
     - Room Management [X]
-- Information Dashboard [0/1]
+- Information Dashboard [0/3]
     - Dashboard Page [ ]
+    - Accessibility Settings [ ]
+    - Account Settings [ ]
 - Frontend Design [0/1]
     - Appealing Web Design [ ]
 
